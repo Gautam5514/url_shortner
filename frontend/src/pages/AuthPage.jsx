@@ -1,31 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
-// A separate header component for this page to match the design
-const AuthHeader = () => {
-  return (
-    <header className="bg-white py-4 px-8 shadow-sm">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
-          <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
-          <span className="ml-3 text-2xl font-bold text-gray-800">ShortenURL</span>
-        </div>
-        <nav className="hidden md:flex items-center space-x-6 text-gray-600">
-          <a href="#" className="hover:text-gray-900">Features</a>
-          <a href="#" className="hover:text-gray-900">Pricing</a>
-          <a href="#" className="hover:text-gray-900">Resources</a>
-        </nav>
-        <div className="hidden md:flex items-center space-x-2">
-          <button className="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600 font-semibold">Sign Up</button>
-          <button className="bg-gray-100 text-gray-700 px-5 py-2 rounded-md hover:bg-gray-200 font-semibold">Log In</button>
-        </div>
-      </div>
-    </header>
-  );
-};
 
 const AuthPage = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(true);
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -33,46 +13,45 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  
+    const from = location.state?.from?.pathname || '/dashboard';
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
 
-    try {
-      let response;
-      if (isSignUp) {
-        // --- Call the new /register endpoint ---
-        response = await axios.post('http://localhost:5000/api/users/register', {
-          name,
-          email,
-          password,
-          phoneNumber,
-        });
-      } else {
-        // --- Call the new /login endpoint ---
-        response = await axios.post('http://localhost:5000/api/users/login', {
-          email,
-          password,
-        });
-      }
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+        try {
+            let response;
+            if (isSignUp) {
+                response = await axios.post(`${API_BASE_URL}/users/register`, {
+                    name, email, password, phoneNumber,
+                });
+            } else {
+                response = await axios.post(`${API_BASE_URL}/users/login`, {
+                    email, password,
+                });
+            }
       
-      // Store user data and token in local storage to keep them logged in
-      localStorage.setItem('userInfo', JSON.stringify(response.data));
+            // Store user data in local storage
+            localStorage.setItem('userInfo', JSON.stringify(response.data));
       
-      navigate('/dashboard');
+            // Navigate to the correct 'from' path!
+            navigate(from, { replace: true });
 
-    } catch (err) {
-      // Set the error message from the backend's response
-      setError(err.response?.data?.message || 'An unknown error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-   return (
+        } catch (err) {
+            setError(err.response?.data?.message || 'An unknown error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+  
+  return (
     <div className="bg-white min-h-screen">
-      <AuthHeader />
       <div className="flex flex-col items-center justify-center mt-12 md:mt-20">
         <div className="w-full max-w-md text-center px-4">
           <h1 className="text-4xl font-bold text-gray-800">

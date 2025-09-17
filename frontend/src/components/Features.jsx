@@ -21,7 +21,7 @@ const Features = () => {
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-800">The ultimate tool for link management</h2>
           <p className="text-gray-600 mt-4">
-            ShortenIt is more than just a URL shortener. It’s a powerful platform to help you manage, track, and optimize every link you share.
+            Linkly is more than just a URL shortener. It’s a powerful platform to help you manage, track, and optimize every link you share.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">

@@ -3,60 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
 
-// --- Reusable Card Component ---
 const Card = ({ children, className = '' }) => (
   <div className={`bg-white rounded-xl shadow-md p-6 ${className}`}>{children}</div>
 );
 
-// --- Header Component ---
-const DashboardHeader = () => {
-  const navigate = useNavigate();
-  return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="container mx-auto flex justify-between items-center p-4">
-        <div className="flex items-center">
-          <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" /></svg>
-          <span className="ml-3 text-2xl font-bold text-gray-800">ShortenIt</span>
-        </div>
-        <nav className="hidden md:flex items-center space-x-8 text-gray-600 font-medium">
-          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-900">Dashboard</button>
-          <button onClick={() => navigate('/my-links')} className="hover:text-gray-900">My Links</button>
-        </nav>
-        <div className="flex items-center space-x-4">
-          <img className="w-9 h-9 rounded-full" src="https://i.pravatar.cc/150?img=32" alt="User" />
-        </div>
-      </div>
-    </header>
-  );
-};
-
-// --- Main Dashboard Page Component ---
 const DashboardPage = () => {
   const API_URL = 'http://localhost:5000/api';
   const navigate = useNavigate();
-
-  // State for the creation form
   const [originalUrl, setOriginalUrl] = useState('');
   const [customCode, setCustomCode] = useState('');
-  
-  // State to hold the most recently created link's details and stats
   const [createdLink, setCreatedLink] = useState(null);
   const [stats, setStats] = useState({ totalClicks: 0, uniqueClicks: 0, clicksOverTime: [] });
-  
-  // UI State
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
 
-  // Handler for the "Shorten URL" form submission
   const handleCreateLink = async (e) => {
     e.preventDefault();
     setIsCreating(true);
     setError('');
-    setCreatedLink(null); // Clear previous result
+    setCreatedLink(null); 
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
     if (!userInfo || !userInfo.token) {
-      navigate('/login'); // Redirect to login if user info is missing
+      navigate('/login'); 
       return;
     }
 
@@ -64,20 +33,16 @@ const DashboardPage = () => {
     const body = { originalUrl, customCode: customCode || undefined };
 
     try {
-      // Step 1: Create the new link by calling the backend API
       const { data: newLink } = await axios.post(`${API_URL}/urls`, body, config);
       setCreatedLink(newLink);
 
-      // Step 2: Immediately fetch its (initial) stats
       const { data: newStats } = await axios.get(`${API_URL}/urls/${newLink._id}/stats`, config);
       setStats(newStats);
 
-      // Clear the form fields for the next use
       setOriginalUrl('');
       setCustomCode('');
 
     } catch (err) {
-      // Display a user-friendly error from the backend if available
       setError(err.response?.data?.message || 'An error occurred. Please try again.');
       console.error(err);
     } finally {
@@ -85,13 +50,10 @@ const DashboardPage = () => {
     }
   };
 
-  // --- Main Render ---
   return (
     <div className="bg-gray-50 min-h-screen">
-      <DashboardHeader />
       <main className="container mx-auto p-6">
         
-        {/* --- Section 1: Create New Link Form --- */}
         <Card>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Shorten a Long URL</h1>
           <form onSubmit={handleCreateLink} className="space-y-4">
@@ -134,12 +96,9 @@ const DashboardPage = () => {
           </form>
         </Card>
 
-        {/* --- Section 2: Show Result After Creation --- */}
-        {/* This entire section will only appear after a link has been successfully created */}
         {createdLink && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             
-            {/* Left Column: Details & Stats */}
             <div className="lg:col-span-2 space-y-6">
               <Card>
                 <h2 className="text-xl font-bold mb-4 text-green-600">Link Created Successfully!</h2>
@@ -187,7 +146,6 @@ const DashboardPage = () => {
               </Card>
             </div>
 
-            {/* Right Column: QR Code */}
             <div className="lg:col-span-1">
               <Card>
                 <h2 className="text-xl font-bold mb-4">QR Code</h2>

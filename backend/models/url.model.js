@@ -6,7 +6,7 @@ const urlSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'User', // This links the URL to a specific user
+    ref: 'User', 
   },
   originalUrl: {
     type: String,
@@ -15,7 +15,7 @@ const urlSchema = new mongoose.Schema({
   shortCode: {
     type: String,
     required: true,
-    unique: true, // Every short code MUST be unique
+    unique: true, 
   },
   shortUrl: {
     type: String,
@@ -40,12 +40,10 @@ const urlSchema = new mongoose.Schema({
     default: 0,
   },
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt fields
+  timestamps: true, 
 });
 
-// Create an index on shortCode for fast lookups during redirection
 urlSchema.index({ shortCode: 1 });
-// Create an index on the user field to quickly find all links for a user
 urlSchema.index({ user: 1 });
 
 const Url = mongoose.model('Url', urlSchema);

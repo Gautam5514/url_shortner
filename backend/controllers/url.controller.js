@@ -5,9 +5,6 @@ const Analytics = require('../models/analytics.model');
 const { nanoid } = require('nanoid');
 const mongoose = require('mongoose');
 
-// @desc    Create a new short URL
-// @route   POST /api/urls
-// @access  Private
 const createShortUrl = async (req, res) => {
     const { originalUrl, customCode, title, description } = req.body;
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5001}`;
@@ -25,7 +22,7 @@ const createShortUrl = async (req, res) => {
             }
             shortCode = customCode;
         } else {
-            // Generate a unique short code, ensuring it doesn't already exist
+        
             do {
                 shortCode = nanoid(7); // Generate a 7-character ID
             } while (await Url.findOne({ shortCode }));
@@ -49,9 +46,6 @@ const createShortUrl = async (req, res) => {
     }
 };
 
-// @desc    Get all URLs for the logged-in user
-// @route   GET /api/urls
-// @access  Private
 const getUserUrls = async (req, res) => {
     try {
         const urls = await Url.find({ user: req.user._id }).sort({ createdAt: -1 });
@@ -62,9 +56,7 @@ const getUserUrls = async (req, res) => {
     }
 };
 
-// @desc    Get details for a single URL
-// @route   GET /api/urls/:id
-// @access  Private
+
 const getUrlDetails = async (req, res) => {
     try {
         const url = await Url.findById(req.params.id);
@@ -73,7 +65,7 @@ const getUrlDetails = async (req, res) => {
             return res.status(404).json({ message: 'URL not found.' });
         }
 
-        // --- Security Check: Ensure the user owns this URL ---
+        
         if (url.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: 'Not authorized to view this URL.' });
         }
@@ -85,9 +77,7 @@ const getUrlDetails = async (req, res) => {
     }
 };
 
-// @desc    Update a URL's details
-// @route   PUT /api/urls/:id
-// @access  Private
+
 const updateUrl = async (req, res) => {
     try {
         const { title, description, status, originalUrl } = req.body;
@@ -97,12 +87,12 @@ const updateUrl = async (req, res) => {
             return res.status(404).json({ message: 'URL not found.' });
         }
 
-        // --- Security Check: Ensure the user owns this URL ---
+    
         if (url.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: 'Not authorized to edit this URL.' });
         }
         
-        // Update fields if they are provided in the request body
+        
         url.title = title ?? url.title;
         url.description = description ?? url.description;
         url.status = status ?? url.status;
@@ -117,9 +107,7 @@ const updateUrl = async (req, res) => {
     }
 };
 
-// @desc    Delete a URL
-// @route   DELETE /api/urls/:id
-// @access  Private
+
 const deleteUrl = async (req, res) => {
     try {
         const url = await Url.findById(req.params.id);
@@ -128,12 +116,11 @@ const deleteUrl = async (req, res) => {
             return res.status(404).json({ message: 'URL not found.' });
         }
 
-        // --- Security Check: Ensure the user owns this URL ---
+    
         if (url.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: 'Not authorized to delete this URL.' });
         }
 
-        // Important: Also delete all associated analytics data to keep the DB clean
         await Analytics.deleteMany({ url: url._id });
         await Url.findByIdAndDelete(req.params.id);
 
@@ -145,10 +132,6 @@ const deleteUrl = async (req, res) => {
     }
 };
 
-
-// @desc    Get aggregated statistics for a URL
-// @route   GET /api/urls/:id/stats
-// @access  Private
 const getUrlStats = async (req, res) => {
     try {
         const urlId = req.params.id;
@@ -163,18 +146,15 @@ const getUrlStats = async (req, res) => {
             return res.status(404).json({ message: 'URL not found.' });
         }
 
-        // --- Security Check: Ensure the user owns this URL ---
+        
         if (url.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: 'Not authorized to view these stats.' });
         }
 
-        // 1. Get total clicks from the URL model for efficiency
         const totalClicks = url.clicks;
         
-        // 2. Calculate unique clicks by counting distinct IP addresses
         const uniqueClicks = await Analytics.distinct('ipAddress', { url: urlId }).countDocuments();
 
-        // 3. Get click data for the last 30 days for the chart
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
@@ -192,12 +172,12 @@ const getUrlStats = async (req, res) => {
                 }
             },
             {
-                $sort: { _id: 1 } // Sort by date ascending
+                $sort: { _id: 1 } 
             },
             {
                 $project: {
                     _id: 0,
-                    name: "$_id", // Rename _id to name to match your chart's expected data key
+                    name: "$_id", 
                     clicks: "$clicks"
                 }
             }
@@ -216,7 +196,7 @@ const getUrlStats = async (req, res) => {
 };
 
 
-// Don't forget to export all the new functions
+
 module.exports = {
     createShortUrl,
     getUserUrls,
