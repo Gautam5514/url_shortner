@@ -24,7 +24,7 @@ const createShortUrl = async (req, res) => {
         } else {
         
             do {
-                shortCode = nanoid(7); // Generate a 7-character ID
+                shortCode = nanoid(7); 
             } while (await Url.findOne({ shortCode }));
         }
 
