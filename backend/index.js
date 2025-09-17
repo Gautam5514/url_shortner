@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 dotenv.config();
+import { Analytics } from "@vercel/analytics/react"
 
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/user.routes');
