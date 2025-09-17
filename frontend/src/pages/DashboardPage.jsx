@@ -8,7 +8,7 @@ const Card = ({ children, className = '' }) => (
 );
 
 const DashboardPage = () => {
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const navigate = useNavigate();
   const [originalUrl, setOriginalUrl] = useState('');
   const [customCode, setCustomCode] = useState('');

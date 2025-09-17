@@ -21,16 +21,16 @@ const AuthPage = () => {
         setError(null);
         setLoading(true);
 
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
         try {
             let response;
             if (isSignUp) {
-                response = await axios.post(`${API_BASE_URL}/users/register`, {
+                response = await axios.post(`${API_URL}/users/register`, {
                     name, email, password, phoneNumber,
                 });
             } else {
-                response = await axios.post(`${API_BASE_URL}/users/login`, {
+                response = await axios.post(`${API_URL}/users/login`, {
                     email, password,
                 });
             }
