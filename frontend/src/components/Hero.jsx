@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { FiCopy, FiCheck } from 'react-icons/fi';
+// We don't need the copy icons here anymore
+// import { FiCopy, FiCheck } from 'react-icons/fi';
+import ShareModal from './ShareModal'; // Import the new modal component
 
 const Hero = () => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -12,7 +14,9 @@ const Hero = () => {
     const [shortUrlResult, setShortUrlResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [isCopied, setIsCopied] = useState(false);
+    
+    // New state to control the modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleShorten = async (e) => {
         e.preventDefault();
@@ -21,7 +25,7 @@ const Hero = () => {
         setLoading(true);
         setError('');
         setShortUrlResult(null);
-        setIsCopied(false);
+        setIsModalOpen(false); // Make sure modal is closed on new requests
 
         try {
             // Call the NEW public guest endpoint
@@ -30,6 +34,7 @@ const Hero = () => {
             });
             setShortUrlResult(response.data.shortUrl);
             setLongUrl(''); // Clear the input field
+            setIsModalOpen(true); // Open the modal on success!
         } catch (err) {
             setError(err.response?.data?.message || 'Something went wrong. Please try again.');
         } finally {
@@ -37,11 +42,6 @@ const Hero = () => {
         }
     };
     
-    const handleCopy = () => {
-        navigator.clipboard.writeText(shortUrlResult);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
-    };
 
     return (
         <div className="bg-white text-center py-20">
@@ -51,7 +51,7 @@ const Hero = () => {
                 
                 <form onSubmit={handleShorten} className="flex justify-center">
                     <input
-                        type="url" // Use type="url" for better validation
+                        type="url"
                         placeholder="Paste a long URL here"
                         value={longUrl}
                         onChange={(e) => setLongUrl(e.target.value)}
@@ -67,26 +67,18 @@ const Hero = () => {
                     </button>
                 </form>
 
-                {/* --- Result Display Section --- */}
+                
                 {error && <p className="text-red-500 mt-4">{error}</p>}
 
-                {shortUrlResult && (
-                    <div className="mt-8 max-w-xl mx-auto bg-gray-50 p-4 rounded-lg shadow-md flex items-center justify-between">
-                        <span className="text-gray-800 font-medium truncate">{shortUrlResult}</span>
-                        <button 
-                            onClick={handleCopy}
-                            className={`ml-4 px-4 py-2 rounded-md font-semibold text-sm flex items-center transition ${
-                                isCopied 
-                                ? 'bg-green-500 text-white' 
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            {isCopied ? <FiCheck className="mr-2"/> : <FiCopy className="mr-2"/>}
-                            {isCopied ? 'Copied!' : 'Copy'}
-                        </button>
-                    </div>
-                )}
+            
             </div>
+
+            {/* Render the Modal */}
+            <ShareModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                shortUrl={shortUrlResult}
+            />
         </div>
     );
 };
